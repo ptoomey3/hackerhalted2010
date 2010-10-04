@@ -1,0 +1,15 @@
+<html>
+<head>
+<title>Sensitive Info 2</title>
+</head>
+<body>
+
+<h1>Sensitive Info 2</h1>
+<ul>
+{% for data_element in data %}
+	<input type="hidden" name="sensitive_stuff" value="{{ data_element.data }}">
+    <li>foo</li>
+{% endfor %}
+</ul>
+</body>
+</html>

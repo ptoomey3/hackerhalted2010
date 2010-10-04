@@ -1,0 +1,36 @@
+<html>
+<head>
+<title>Session 1 or 2 Login Page</title>
+</head>
+<body>
+<table width="300" border="0" align="center" cellpadding="0" cellspacing="1" bgcolor="#CCCCCC">
+<tr>
+<form name="loginform" method="post" action="session1or2_login">{% csrf_token %}
+<td>
+<table width="100%" border="0" cellpadding="3" cellspacing="1" bgcolor="#FFFFFF">
+<tr>
+<td colspan="3"><strong>User Login </strong></td>
+</tr>
+<tr>
+<td width="78">Username</td>
+<td width="6">:</td>
+<td width="294"><input name="username" type="text" id="username"></td>
+</tr>
+<tr>
+<td>Password</td>
+<td>:</td>
+<td><input name="password" type="text" id="password"></td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td><input type="submit" name="Submit" value="Login"></td>
+</tr>
+</table>
+</td>
+</form>
+</tr>
+</table>
+
+</body>
+</html>
