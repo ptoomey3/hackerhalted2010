@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     (r'^sensitiveinfo1', 'hackerhalted.appscantests.views.sensitiveinfo1'),
     (r'^sensitiveinfo2', 'hackerhalted.appscantests.views.sensitiveinfo2'),
     (r'^sensitiveinfo3', 'hackerhalted.appscantests.views.sensitiveinfo3'),
+    (r'^sensitiveinfo4', 'hackerhalted.appscantests.views.sensitiveinfo4'),
     
 #    (r'^images/(?P<image_id>\d+)_(?P<h>\d+)x(?P<w>\d+)$', 'reportgen.reports.views.reportimagethumb'),
     

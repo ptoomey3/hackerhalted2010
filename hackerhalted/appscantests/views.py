@@ -177,3 +177,10 @@ def sensitiveinfo3(request):
     parsed_data = [x.data.split('-') for x in sensitive_data]      
     c = Context({'data':parsed_data})
     return HttpResponse(t.render(c))
+
+def sensitiveinfo4(request):
+    t=loader.get_template('sensitiveinfo3.html')
+    sensitive_data = SensitiveData.objects.all()
+    parsed_data = [x.data.split('-') for x in sensitive_data]      
+    c = Context({'data':parsed_data})
+    return HttpResponse(t.render(c))
