@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Max
 import random
 from django.utils.safestring import mark_safe
+from django.core.validators import email_re
 
 
 def session1(request):
@@ -136,28 +137,68 @@ def xss_reflected1(request):
 
 def xss_stored1(request):
     t=loader.get_template('xss_stored1.html')
-    var1 = request.GET.get('var1', '')  
-    xss_data = XSSData(data=var1)
+    data = request.GET.get('data', '')  
+    xss_data = XSSData(data=data)
     xss_data.save()
     c = Context({'id':xss_data.id})
     return HttpResponse(t.render(c))
 
 def xss_stored1_get_xssdata(request):
     t=loader.get_template('xss_stored1_get_xssdata.html')
-    if request.GET.has_key('id'):
-        try:
-            id = int(request.GET['id'])
-        except ValueError:
-            id = -1
-    else:
-        id = -1
-    xss_data = get_object_or_404(XSSData, id=id)
-    if xss_data:
+    id = request.GET.get('id', -1)
+    try:
+        xss_data = XSSData.objects.get(id=id)
         data = xss_data.data
-    else:
+    except XSSData.DoesNotExist:
         data = ''
     c = Context({'data':mark_safe(data)})
     return HttpResponse(t.render(c))
+
+def xss_stored2(request):
+    t=loader.get_template('xss_stored2.html')
+    data = request.GET.get('data', '')  
+    email = request.GET.get('email', '')
+    try:
+        xss_data = XSSData2.objects.get(email=email)
+        xss_data.data = data
+    except XSSData2.DoesNotExist:
+        xss_data = XSSData2(data=data, email=email)
+    xss_data.save()
+    c = Context({})
+    c.update(csrf(request))
+    return HttpResponse(t.render(c))
+
+def xss_stored2_get_xssdata(request):
+    t=loader.get_template('xss_stored2_get_xssdata.html')
+    email = request.POST.get('email', '')
+    try:
+        xss_data = XSSData2.objects.get(email=email)
+        data = xss_data.data
+    except XSSData2.DoesNotExist:
+        data = ''
+    c = Context({'data':mark_safe(data)})
+    return HttpResponse(t.render(c))
+
+def xss_stored3(request):
+    t=loader.get_template('xss_stored3.html')
+    data = request.GET.get('data', '')  
+    xss_data = XSSData(data=data)
+    xss_data.save()
+    c = Context({'id':xss_data.id})
+    c.update(csrf(request))
+    return HttpResponse(t.render(c))
+
+def xss_stored3_get_xssdata(request):
+    t=loader.get_template('xss_stored3_get_xssdata.html')
+    id = request.POST.get('id', -1)
+    try:
+        xss_data = XSSData.objects.get(id=id)
+        data = xss_data.data
+    except XSSData.DoesNotExist:
+        data = ''
+    c = Context({'data':mark_safe(data)})
+    return HttpResponse(t.render(c))
+
 
 def sensitiveinfo1(request):
     t=loader.get_template('sensitiveinfo1.html')
@@ -179,8 +220,9 @@ def sensitiveinfo3(request):
     return HttpResponse(t.render(c))
 
 def sensitiveinfo4(request):
-    t=loader.get_template('sensitiveinfo3.html')
+    t=loader.get_template('sensitiveinfo4.html')
     sensitive_data = SensitiveData.objects.all()
     parsed_data = [x.data.split('-') for x in sensitive_data]      
     c = Context({'data':parsed_data})
+    
     return HttpResponse(t.render(c))

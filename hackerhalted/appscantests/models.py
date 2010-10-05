@@ -26,8 +26,23 @@ class Session2(models.Model):
     def __unicode__(self):
         return str(self.session_id)
     
+class Session3(models.Model):
+    session_id = models.CharField(max_length=200)
+    user = models.ForeignKey(User)
+    session_valid = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return str(self.session_id)    
+    
 class XSSData(models.Model):
     data = models.CharField(max_length=200)
+    
+    def __unicode__(self):
+        return "XSS Data " + str(self.id) 
+    
+class XSSData2(models.Model):
+    data = models.CharField(max_length=200)
+    email = models.CharField(max_length=200)
     
     def __unicode__(self):
         return "XSS Data " + str(self.id) 

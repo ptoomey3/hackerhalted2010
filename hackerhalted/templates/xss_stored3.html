@@ -1,0 +1,26 @@
+<html>
+<head>
+<title>Stored XSS 1 </title>
+</head>
+<body>
+<script type="text/javascript">
+function click_it() {
+	var id = document.getElementById('record_id').value;
+	document.getElementById('id').value = id;
+	document.forms[0].submit()
+	
+	
+}
+</script>
+<input type="hidden" id="record_id" value="{{id}}">
+
+<form method=POST action="/appscantests/xss_stored3_get_xssdata">{% csrf_token %}
+<input type="hidden" name="id" id="id" value="">
+</form>
+
+
+
+<button onclick="click_it()">Click Me</button>
+
+</body>
+</html>

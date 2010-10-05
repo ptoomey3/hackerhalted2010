@@ -1,0 +1,12 @@
+<html>
+<head>
+<title>Stored XSS 1 </title>
+</head>
+<body>
+<form method=POST action="/appscantests/xss_stored2_get_xssdata">{% csrf_token %}
+<p>E-Mail Address: <input type="text" name="email"></p>
+</form>
+
+
+</body>
+</html>
