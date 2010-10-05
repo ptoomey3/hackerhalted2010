@@ -33,6 +33,15 @@ class Session3(models.Model):
 
     def __unicode__(self):
         return str(self.session_id)    
+
+class Session4(models.Model):
+    session_id = models.IntegerField()
+    session_id_hash = models.CharField(max_length=200)
+    user = models.ForeignKey(User)
+    session_valid = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return str(self.session_id)  
     
 class XSSData(models.Model):
     data = models.CharField(max_length=200)

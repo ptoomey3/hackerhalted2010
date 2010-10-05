@@ -9,6 +9,7 @@ from django.db.models import Max
 import random
 from django.utils.safestring import mark_safe
 from django.core.validators import email_re
+import hashlib
 
 
 def session1(request):
@@ -18,20 +19,6 @@ def session1(request):
       
     return HttpResponse(t.render(c))
 
-def session1or2(request):
-    t=loader.get_template('session1or2_index.html')
-    c = Context ({})
-    c.update(csrf(request))
-      
-    return HttpResponse(t.render(c))
-
-def session3(request):
-    t=loader.get_template('session3_index.html')
-    c = Context ({})
-    c.update(csrf(request))
-      
-    return HttpResponse(t.render(c))
-    
 def session1_login(request):
     username = request.POST.get('username', "")
     password = request.POST.get('password', "")  
@@ -49,6 +36,47 @@ def session1_login(request):
     response = HttpResponseRedirect('/appscantests/session1_authed')
     response.set_cookie('session_cookie', next_session_id)
     return response
+
+def session1_authed(request):
+    if request.COOKIES.has_key('session_cookie'):
+        try:
+            session_id = int(request.COOKIES['session_cookie'])
+        except ValueError:
+            session_id = -1
+    else:
+        session_id = -1
+    try:
+        session = Session1.objects.get(session_id=session_id, session_valid=True)
+    except Session1.DoesNotExist:
+        return HttpResponseRedirect('/appscantests/session1')    
+    t=loader.get_template('session1_authed.html')
+    c = Context ({})
+    return HttpResponse(t.render(c))
+
+def session1_logout(request):
+    if request.COOKIES.has_key('session_cookie'):
+        try:
+            session_id = int(request.COOKIES['session_cookie'])
+        except ValueError:
+            session_id = -1
+    else:
+        session_id = -1
+    try:
+        session = Session1.objects.get(session_id=session_id)
+        session.session_valid = False;
+        session.save()
+    except Session1.DoesNotExist:
+        pass
+    response = HttpResponseRedirect('/appscantests/session1')
+    response.set_cookie('session_cookie', '0')
+    return response
+
+def session1or2(request):
+    t=loader.get_template('session1or2_index.html')
+    c = Context ({})
+    c.update(csrf(request))
+      
+    return HttpResponse(t.render(c))
 
 def session1or2_login(request):
     username = request.POST.get('username', "")
@@ -73,41 +101,6 @@ def session1or2_login(request):
     response.set_cookie('session_cookie', next_session_id)
     return response
 
-def session3_login(request):
-    username = request.POST.get('username', "")
-    password = request.POST.get('password', "")  
-    try:
-        user = User.objects.get(username=username, password=password)
-    except User.DoesNotExist:
-        return HttpResponseRedirect('/appscantests/session3')
-    
-    try:
-        session = Session3.objects.get(session_id=user.username, user=user)
-        session.session_valid = True
-    except Session3.DoesNotExist:
-        session = Session3(session_id=user.username, user=user, session_valid=True)
-    session.save()
-    response = HttpResponseRedirect('/appscantests/session3_authed')
-    response.set_cookie('session_cookie', user.username)
-    return response
-
-    
-def session1_authed(request):
-    if request.COOKIES.has_key('session_cookie'):
-        try:
-            session_id = int(request.COOKIES['session_cookie'])
-        except ValueError:
-            session_id = -1
-    else:
-        session_id = -1
-    session = Session1.objects.filter(session_id=session_id, session_valid=True)
-    if not session:
-        return HttpResponseRedirect('/appscantests/session1')
-    else:
-        t=loader.get_template('session1_authed.html')
-        c = Context ({})
-        return HttpResponse(t.render(c))
-    
 def session1or2_authed(request):
     if request.COOKIES.has_key('session_cookie'):
         try:
@@ -123,41 +116,6 @@ def session1or2_authed(request):
         t=loader.get_template('session1or2_authed.html')
         c = Context ({})
         return HttpResponse(t.render(c))
-    
-def session3_authed(request):
-    if request.COOKIES.has_key('session_cookie'):
-        try:
-            session_id = request.COOKIES['session_cookie']
-        except ValueError:
-            session_id = ''
-    else:
-        session_id = ''
-    session = Session3.objects.filter(session_id=session_id, session_valid=True)
-    if not session:
-        return HttpResponseRedirect('/appscantests/session3')
-    else:
-        t=loader.get_template('session3_authed.html')
-        c = Context ({})
-        return HttpResponse(t.render(c))
-
-    
-def session1_logout(request):
-    if request.COOKIES.has_key('session_cookie'):
-        try:
-            session_id = int(request.COOKIES['session_cookie'])
-        except ValueError:
-            session_id = -1
-    else:
-        session_id = -1
-    try:
-        session = Session1.objects.get(session_id=session_id)
-        session.session_valid = False;
-        session.save()
-    except Session1.DoesNotExist:
-        pass
-    response = HttpResponseRedirect('/appscantests/session1')
-    response.set_cookie('session_cookie', '0')
-    return response
 
 def session1or2_logout(request):
     if request.COOKIES.has_key('session_cookie'):
@@ -182,6 +140,47 @@ def session1or2_logout(request):
     response.set_cookie('session_cookie', '0')
     return response
 
+def session3(request):
+    t=loader.get_template('session3_index.html')
+    c = Context ({})
+    c.update(csrf(request))
+      
+    return HttpResponse(t.render(c))
+    
+def session3_login(request):
+    username = request.POST.get('username', "")
+    password = request.POST.get('password', "")  
+    try:
+        user = User.objects.get(username=username, password=password)
+    except User.DoesNotExist:
+        return HttpResponseRedirect('/appscantests/session3')
+    
+    try:
+        session = Session3.objects.get(session_id=user.username, user=user)
+        session.session_valid = True
+    except Session3.DoesNotExist:
+        session = Session3(session_id=user.username, user=user, session_valid=True)
+    session.save()
+    response = HttpResponseRedirect('/appscantests/session3_authed')
+    response.set_cookie('session_cookie', user.username)
+    return response
+    
+def session3_authed(request):
+    if request.COOKIES.has_key('session_cookie'):
+        try:
+            session_id = request.COOKIES['session_cookie']
+        except ValueError:
+            session_id = ''
+    else:
+        session_id = ''
+    session = Session3.objects.filter(session_id=session_id, session_valid=True)
+    if not session:
+        return HttpResponseRedirect('/appscantests/session3')
+    else:
+        t=loader.get_template('session3_authed.html')
+        c = Context ({})
+        return HttpResponse(t.render(c))
+
 def session3_logout(request):
     if request.COOKIES.has_key('session_cookie'):
             session_id = request.COOKIES['session_cookie']
@@ -197,6 +196,59 @@ def session3_logout(request):
     response.set_cookie('session_cookie', '')
     return response
 
+def session4(request):
+    t=loader.get_template('session4_index.html')
+    c = Context ({})
+    c.update(csrf(request))
+      
+    return HttpResponse(t.render(c))
+
+def session4_login(request):
+    username = request.POST.get('username', "")
+    password = request.POST.get('password', "")  
+    try:
+        user = User.objects.get(username=username, password=password)
+    except User.DoesNotExist:
+        return HttpResponseRedirect('/appscantests/session4')
+    
+    max_session_id = Session4.objects.all().aggregate(Max('session_id'))['session_id__max']
+    if not max_session_id:
+        max_session_id = 1
+    next_session_id = max_session_id + 1
+    session_id_hash = hashlib.md5(str(next_session_id)).hexdigest()
+    session = Session4(session_id=next_session_id, session_id_hash=session_id_hash, user=user, session_valid=True)
+    session.save()
+    response = HttpResponseRedirect('/appscantests/session4_authed')
+    response.set_cookie('session_cookie', session_id_hash)
+    return response
+
+def session4_authed(request):
+    if request.COOKIES.has_key('session_cookie'):
+        session_id_hash = request.COOKIES['session_cookie']
+    else:
+        session_id_hash = ''
+    try:
+        session = Session4.objects.get(session_id_hash=session_id_hash, session_valid=True)
+    except Session4.DoesNotExist:
+        return HttpResponseRedirect('/appscantests/session4')
+    t=loader.get_template('session4_authed.html')
+    c = Context ({})
+    return HttpResponse(t.render(c))
+
+def session4_logout(request):
+    if request.COOKIES.has_key('session_cookie'):
+        session_id_hash = request.COOKIES['session_cookie']
+    else:
+        session_id_hash = ''
+    try:
+        session = Session4.objects.get(session_id_hash=session_id_hash)
+        session.session_valid = False;
+        session.save()
+    except Session4.DoesNotExist:
+        pass
+    response = HttpResponseRedirect('/appscantests/session4')
+    response.set_cookie('session_cookie', '')
+    return response
 
 def xss_reflected1(request):
     t=loader.get_template('xss_reflected1.html')
