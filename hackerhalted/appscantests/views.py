@@ -24,41 +24,73 @@ def session1or2(request):
     c.update(csrf(request))
       
     return HttpResponse(t.render(c))
+
+def session3(request):
+    t=loader.get_template('session3_index.html')
+    c = Context ({})
+    c.update(csrf(request))
+      
+    return HttpResponse(t.render(c))
     
 def session1_login(request):
     username = request.POST.get('username', "")
     password = request.POST.get('password', "")  
-    user = User.objects.filter(username=username, password=password)
-    if not user:
+    try:
+        user = User.objects.get(username=username, password=password)
+    except User.DoesNotExist:
         return HttpResponseRedirect('/appscantests/session1')
-    else:
-        user = user[0]
-        next_session_id = Session1.objects.all().aggregate(Max('session_id'))['session_id__max'] + 1
-        session = Session1(session_id=next_session_id, user=user, session_valid=True)
-        session.save()
-        response = HttpResponseRedirect('/appscantests/session1_authed')
-        response.set_cookie('session_cookie', next_session_id)
-        return response
     
+    max_session_id = Session1.objects.all().aggregate(Max('session_id'))['session_id__max']
+    if not max_session_id:
+        max_session_id = 100000
+    next_session_id = max_session_id + 1
+    session = Session1(session_id=next_session_id, user=user, session_valid=True)
+    session.save()
+    response = HttpResponseRedirect('/appscantests/session1_authed')
+    response.set_cookie('session_cookie', next_session_id)
+    return response
+
 def session1or2_login(request):
     username = request.POST.get('username', "")
     password = request.POST.get('password', "")  
-    user = User.objects.filter(username=username, password=password)
-    if not user:
+    try:
+        user = User.objects.get(username=username, password=password)
+    except User.DoesNotExist:
         return HttpResponseRedirect('/appscantests/session1or2')
+
+    session_table_num = random.randint(1,2)
+    if session_table_num == 1:
+        session_table = Session1
     else:
-        user = user[0]
-        session_table = random.randint(1,2)
-        if session_table == 1:
-            session_table = Session1
-        else:
-            session_table = Session2
-        next_session_id = session_table.objects.all().aggregate(Max('session_id'))['session_id__max'] + 1
-        session = session_table(session_id=next_session_id, user=user, session_valid=True)
-        session.save()
-        response = HttpResponseRedirect('/appscantests/session1or2_authed')
-        response.set_cookie('session_cookie', next_session_id)
-        return response
+        session_table = Session2
+    max_session_id = session_table.objects.all().aggregate(Max('session_id'))['session_id__max']
+    if not max_session_id:
+        max_session_id = 100000 * session_table_num
+    next_session_id = max_session_id + 1
+    session = session_table(session_id=next_session_id, user=user, session_valid=True)
+    session.save()
+    response = HttpResponseRedirect('/appscantests/session1or2_authed')
+    response.set_cookie('session_cookie', next_session_id)
+    return response
+
+def session3_login(request):
+    username = request.POST.get('username', "")
+    password = request.POST.get('password', "")  
+    try:
+        user = User.objects.get(username=username, password=password)
+    except User.DoesNotExist:
+        return HttpResponseRedirect('/appscantests/session3')
+    
+    try:
+        session = Session3.objects.get(session_id=user.username, user=user)
+        session.session_valid = True
+    except Session3.DoesNotExist:
+        session = Session3(session_id=user.username, user=user, session_valid=True)
+    session.save()
+    response = HttpResponseRedirect('/appscantests/session3_authed')
+    response.set_cookie('session_cookie', user.username)
+    return response
+
     
 def session1_authed(request):
     if request.COOKIES.has_key('session_cookie'):
@@ -92,6 +124,22 @@ def session1or2_authed(request):
         c = Context ({})
         return HttpResponse(t.render(c))
     
+def session3_authed(request):
+    if request.COOKIES.has_key('session_cookie'):
+        try:
+            session_id = request.COOKIES['session_cookie']
+        except ValueError:
+            session_id = ''
+    else:
+        session_id = ''
+    session = Session3.objects.filter(session_id=session_id, session_valid=True)
+    if not session:
+        return HttpResponseRedirect('/appscantests/session3')
+    else:
+        t=loader.get_template('session3_authed.html')
+        c = Context ({})
+        return HttpResponse(t.render(c))
+
     
 def session1_logout(request):
     if request.COOKIES.has_key('session_cookie'):
@@ -101,11 +149,12 @@ def session1_logout(request):
             session_id = -1
     else:
         session_id = -1
-    session = Session1.objects.filter(session_id=session_id)
-    if session:
-        session = session[0]
+    try:
+        session = Session1.objects.get(session_id=session_id)
         session.session_valid = False;
         session.save()
+    except Session1.DoesNotExist:
+        pass
     response = HttpResponseRedirect('/appscantests/session1')
     response.set_cookie('session_cookie', '0')
     return response
@@ -118,13 +167,34 @@ def session1or2_logout(request):
             session_id = -1
     else:
         session_id = -1
-    session = Session1.objects.filter(session_id=session_id) or Session2.objects.filter(session_id=session_id)
-    if session:
-        session = session[0]
+    try:
+        session = Session1.objects.get(session_id=session_id)
         session.session_valid = False;
-        session.save()
+        session.save()    
+    except Session1.DoesNotExist:
+        try:
+            session = Session2.objects.get(session_id=session_id)
+            session.session_valid = False;
+            session.save()    
+        except Session2.DoesNotExist:
+            pass
     response = HttpResponseRedirect('/appscantests/session1or2')
     response.set_cookie('session_cookie', '0')
+    return response
+
+def session3_logout(request):
+    if request.COOKIES.has_key('session_cookie'):
+            session_id = request.COOKIES['session_cookie']
+    else:
+        session_id = ''
+    try:
+        session = Session3.objects.get(session_id=session_id)
+        session.session_valid = False;
+        session.save()    
+    except Session3.DoesNotExist:
+        pass
+    response = HttpResponseRedirect('/appscantests/session3')
+    response.set_cookie('session_cookie', '')
     return response
 
 
