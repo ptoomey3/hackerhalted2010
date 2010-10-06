@@ -61,3 +61,19 @@ class SensitiveData(models.Model):
     
     def __unicode__(self):
         return "Sensitive Data " + str(self.id)   
+    
+class SQLInjectionData(models.Model):
+    data1 = models.CharField(max_length=200)
+    data2 = models.CharField(max_length=200)
+    data3 = models.CharField(max_length=200)
+    data4 = models.CharField(max_length=200)
+    data5 = models.IntegerField()
+    data6 = models.IntegerField()
+    data7 = models.IntegerField()
+    data8 = models.IntegerField()
+
+    def __unicode__(self):
+        return "SQL Data " + str(self.id)   
+    
+    
+    

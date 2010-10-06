@@ -1,1 +1,1 @@
-[{"pk": 1, "model": "appscantests.user", "fields": {"username": "user1", "password": "password"}}]
+[{"pk": 1, "model": "appscantests.user", "fields": {"username": "user1", "password": "password"}}, {"pk": 1, "model": "appscantests.sqlinjectiondata", "fields": {"data8": 4, "data5": 1, "data4": "foo4", "data7": 3, "data6": 2, "data1": "foo1", "data3": "foo3", "data2": "foo2"}}, {"pk": 2, "model": "appscantests.sqlinjectiondata", "fields": {"data8": 9, "data5": 6, "data4": "bar4", "data7": 8, "data6": 7, "data1": "bar1", "data3": "bar3", "data2": "bar2"}}]
