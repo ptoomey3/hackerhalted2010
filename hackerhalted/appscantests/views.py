@@ -409,6 +409,13 @@ def dirtraverse7(request):
     fname = fname.partition('\x00')[0]
     return openorerror(fname)
 
+# Test case: fn=..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252f..%252fetc%252fpasswd (double decode after check)
+def dirtraverse8(request):
+    data = request.GET.get('fn', '')
+    fname = settings.MEDIA_ROOT + os.path.basename(data)
+    fname = urllib.unquote(fname)
+    return openorerror(fname)
+
 def handle_uploaded_file(f):
     destination = open(settings.SITE_ROOT + '/upload_files/' + f.name, 'wb+')
     for chunk in f.chunks():
