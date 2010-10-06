@@ -10,7 +10,9 @@ import random
 from django.utils.safestring import mark_safe
 from django.core.validators import email_re
 import hashlib
-
+from django.conf import settings
+import os.path
+import urllib
 
 def session1(request):
     t=loader.get_template('session1_index.html')
@@ -348,3 +350,78 @@ def sensitiveinfo4(request):
     c = Context({'data':parsed_data})
     
     return HttpResponse(t.render(c))
+
+# Landing page
+def dirtraverse(request):
+    t=loader.get_template('dirtraverse.html')
+    c = Context()   
+    return HttpResponse(t.render(c))
+
+def openorerror(fname):
+    try:
+        f = open(fname, 'r')
+        return HttpResponse(f)
+    except IOError:
+        return HttpResponse("Could not open %s" % fname)
+    
+# Test case: fn=../../../../../../../../../etc/passwd
+def dirtraverse1(request):
+    data = request.GET.get('fn', '')
+    fname = settings.MEDIA_ROOT + data
+    return openorerror(fname)
+
+# Test case: fn=....//....//....//....//....//....//....//....//....//....//etc/passwd
+def dirtraverse2(request):
+    data = request.GET.get('fn', '')
+    fname = settings.MEDIA_ROOT + data.replace('../', '')
+    return openorerror(fname)
+
+# Test case: dn=../../../../../../../../../etc&fn=passwd
+def dirtraverse3(request):
+    data = request.GET.get('fn', '')
+    data2 = request.GET.get('dn', '')
+    fname = settings.MEDIA_ROOT + data2 + "/" + os.path.basename(data)
+    return openorerror(fname)
+
+# Test case: fn=../../settings (should be tested test == ./test), showing reliance on /etc/passwd or similar
+def dirtraverse4(request):
+    data = request.GET.get('fn', '')
+    fname = settings.MEDIA_ROOT + data + ".py"
+    return openorerror(fname)
+
+# Test case: fn=../../../../../../../../../etc/passwd%00 (emulate null byte truncation)
+def dirtraverse5(request):
+    data = request.GET.get('fn', '')
+    fname = settings.MEDIA_ROOT + data + ".txt"
+    fname = fname.partition('\x00')[0]
+    return openorerror(fname)
+
+# Test case: fn=.../.../.../.../.../.../.../etc/passwd
+def dirtraverse6(request):
+    data = request.GET.get('fn', '')
+    fname = settings.MEDIA_ROOT + data.replace('..', '.')
+    return openorerror(fname)
+
+# Test case: fn=.../.../.../.../.../.../.../etc/passwd%00 (combo)
+def dirtraverse7(request):
+    data = request.GET.get('fn', '')
+    fname = settings.MEDIA_ROOT + data.replace('..', '.') + ".txt"
+    fname = fname.partition('\x00')[0]
+    return openorerror(fname)
+
+def handle_uploaded_file(f):
+    destination = open(settings.SITE_ROOT + '/upload_files/' + f.name, 'wb+')
+    for chunk in f.chunks():
+        destination.write(chunk)
+    destination.close()
+
+def fileupload(request):
+    if len(request.FILES) == 0:
+        t=loader.get_template('fileupload_index.html')
+        c = Context()   
+        return HttpResponse(t.render(c))
+    else:
+        handle_uploaded_file(request.FILES['upload_file'])
+        t=loader.get_template('fileupload.html')
+        c = Context({'fname': request.FILES['upload_file'].name})   
+        return HttpResponse(t.render(c))

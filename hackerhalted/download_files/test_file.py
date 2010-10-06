@@ -1,0 +1,1 @@
+print "some test file with a .py extension"

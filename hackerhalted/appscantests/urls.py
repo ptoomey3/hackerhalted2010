@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import *
-
+from django.conf import settings
 
 
 
@@ -31,7 +31,17 @@ urlpatterns = patterns('',
     (r'^sensitiveinfo2', 'hackerhalted.appscantests.views.sensitiveinfo2'),
     (r'^sensitiveinfo3', 'hackerhalted.appscantests.views.sensitiveinfo3'),
     (r'^sensitiveinfo4', 'hackerhalted.appscantests.views.sensitiveinfo4'),
-    
+    (r'^dirtraverse$', 'hackerhalted.appscantests.views.dirtraverse'),
+    (r'^dirtraverse1$', 'hackerhalted.appscantests.views.dirtraverse1'),
+    (r'^dirtraverse2$', 'hackerhalted.appscantests.views.dirtraverse2'),
+    (r'^dirtraverse3$', 'hackerhalted.appscantests.views.dirtraverse3'), 
+    (r'^dirtraverse4$', 'hackerhalted.appscantests.views.dirtraverse4'),
+    (r'^dirtraverse5$', 'hackerhalted.appscantests.views.dirtraverse5'),
+    (r'^dirtraverse6$', 'hackerhalted.appscantests.views.dirtraverse6'),
+    (r'^dirtraverse7$', 'hackerhalted.appscantests.views.dirtraverse7'),
+    (r'^fileupload$', 'hackerhalted.appscantests.views.fileupload'),
+    (r'^upload_files/(?P<path>.*)$', 'django.views.static.serve',
+        {'document_root': settings.SITE_ROOT + '/upload_files','show_indexes': True}),        
 #    (r'^images/(?P<image_id>\d+)_(?P<h>\d+)x(?P<w>\d+)$', 'reportgen.reports.views.reportimagethumb'),
     
 )
