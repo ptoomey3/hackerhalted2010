@@ -192,7 +192,7 @@ def session3_logout(request):
         session_id = ''
     try:
         session = Session3.objects.get(session_id=session_id)
-        session.session_valid = False;
+        session.session_valid = True
         session.save()    
     except Session3.DoesNotExist:
         pass
@@ -317,14 +317,23 @@ def xss_stored3(request):
 def xss_stored3_get_xssdata(request):
     t=loader.get_template('xss_stored3_get_xssdata.html')
     id = request.POST.get('id', -1)
-    try:
-        xss_data = XSSData.objects.get(id=id)
-        data = xss_data.data
-    except XSSData.DoesNotExist:
-        data = ''
-    c = Context({'data':mark_safe(data)})
+    xss_data = XSSData.objects.all()
+    c = Context({'data':xss_data})
     return HttpResponse(t.render(c))
 
+def xss_stored4(request):
+    t=loader.get_template('xss_stored4.html')
+    data = request.GET.get('data', '')  
+    xss_data = XSSData(data=data)
+    xss_data.save()
+    c = Context({'id':xss_data.id})
+    return HttpResponse(t.render(c))
+
+def xss_stored4_get_xssdata(request):
+    t=loader.get_template('xss_stored4_get_xssdata.html')
+    xss_data = XSSData.objects.all()
+    c = Context({'data':xss_data})
+    return HttpResponse(t.render(c))
 
 def sensitiveinfo1(request):
     t=loader.get_template('sensitiveinfo1.html')
@@ -437,17 +446,21 @@ def fileupload(request):
 
 def blind_sql_injection1(request):
     query = request.GET.get('query', '')
+    query = query.replace('--', '#')
     conn = MySQLdb.connect (host = "localhost",
                            user = "root",
-                           passwd = "root",
+                           passwd = "",
                            db = "hackerhalted")
     cursor = conn.cursor()
     try:
         query = "SELECT data1 FROM appscantests_sqlinjectiondata WHERE data1='" + query + "'"
         cursor.execute(query)
-        result = 'Good Query'
+        if cursor.fetchone():
+            result = '<html><head><title>foo</title></head><body>good query</body></html>'
+        else:
+            result = '<html><head><title>foo</title></head><body>bad query</body></html>'
     except MySQLdb.ProgrammingError:
-        result = 'Bad Query'
+        result = '<html><head><title>foo</title></head><body>bad query</body></html>'
     cursor.close()
     conn.close()
     
@@ -457,7 +470,7 @@ def blind_sql_injection2(request):
     query = request.GET.get('query', '')
     conn = MySQLdb.connect (host = "localhost",
                            user = "root",
-                           passwd = "root",
+                           passwd = "",
                            db = "hackerhalted")
     cursor = conn.cursor()
     try:
@@ -479,7 +492,7 @@ def blind_sql_injection3(request):
     query = request.GET.get('query', '')
     conn = MySQLdb.connect (host = "localhost",
                            user = "root",
-                           passwd = "root",
+                           passwd = "",
                            db = "hackerhalted")
     cursor = conn.cursor()
     try:
@@ -499,7 +512,7 @@ def blind_sql_injection4(request):
     query = request.GET.get('query', '')
     conn = MySQLdb.connect (host = "localhost",
                            user = "root",
-                           passwd = "root",
+                           passwd = "",
                            db = "hackerhalted")
     cursor = conn.cursor()
     try:
@@ -523,7 +536,7 @@ def blind_sql_injection5(request):
     query = request.GET.get('query', '')
     conn = MySQLdb.connect (host = "localhost",
                            user = "root",
-                           passwd = "root",
+                           passwd = "",
                            db = "hackerhalted")
     cursor = conn.cursor()
     try:

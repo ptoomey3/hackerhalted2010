@@ -1,14 +1,16 @@
 <html>
 <head>
-<title>Stored XSS 3 </title>
+<title>Stored XSS 1 </title>
 </head>
 <body>
 
-<h1>Your Data:</h1>
+<h1>Your Data</h1>
 
+<ul>
 {% for data_element in data %}
     <li>{{ data_element.data|safe }}</li>
 {% endfor %}
+</ul>
 
 </body>
 </html>
