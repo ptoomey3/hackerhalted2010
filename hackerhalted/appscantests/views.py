@@ -456,7 +456,7 @@ def blind_sql_injection1(request):
         query = "SELECT data1 FROM appscantests_sqlinjectiondata WHERE data1='" + query + "'"
         cursor.execute(query)
         if cursor.fetchone():
-            result = '<html><head><title>foo</title></head><body>good query</body></html>'
+            result = '<html><head><title>foo</title></head><body>AAAAAAAAAAAAAA AAAAAAAAAAAAAA AAAAAAAAAAAAAA AAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vvgood query</body></html>'
         else:
             result = '<html><head><title>foo</title></head><body>bad query</body></html>'
     except MySQLdb.ProgrammingError:
@@ -468,6 +468,8 @@ def blind_sql_injection1(request):
 
 def blind_sql_injection2(request):
     query = request.GET.get('query', '')
+    query = query.replace('--', '#')
+
     conn = MySQLdb.connect (host = "localhost",
                            user = "root",
                            passwd = "",
@@ -477,12 +479,12 @@ def blind_sql_injection2(request):
         query = "SELECT data1 FROM appscantests_sqlinjectiondata WHERE data1='" + query + "'"
         cursor.execute(query)
         row = cursor.fetchone()
-        if row:
-            result = "Results"
-        else:
-            result = 'No Results'
+#       if row:
+#        result = "Results"
+#       else:
+        result = 'OK'
     except (MySQLdb.ProgrammingError, MySQLdb.OperationalError):
-        result = 'No Results'
+        result = 'ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR'
     cursor.close()
     conn.close()
     
@@ -490,6 +492,8 @@ def blind_sql_injection2(request):
 
 def blind_sql_injection3(request):
     query = request.GET.get('query', '')
+    query = query.replace('--', '#')
+
     conn = MySQLdb.connect (host = "localhost",
                            user = "root",
                            passwd = "",
@@ -498,11 +502,13 @@ def blind_sql_injection3(request):
     try:
         query = "SELECT data1 FROM appscantests_sqlinjectiondata WHERE data1='" + query + "'"
         cursor.execute(query)
-        cursor.execute(query)
-        cursor.execute(query)
-        result = 'Good Query'
-    except MySQLdb.ProgrammingError:
-        result = 'Bad Query'
+        row = cursor.fetchone()
+#       if row:
+#        result = "Results"
+#       else:
+        result = 'OK'
+    except (MySQLdb.ProgrammingError, MySQLdb.OperationalError):
+        result = 'oh noes bad SQL!'
     cursor.close()
     conn.close()
     
@@ -510,6 +516,8 @@ def blind_sql_injection3(request):
 
 def blind_sql_injection4(request):
     query = request.GET.get('query', '')
+    query = query.replace('--', '#')
+
     conn = MySQLdb.connect (host = "localhost",
                            user = "root",
                            passwd = "",
@@ -518,22 +526,65 @@ def blind_sql_injection4(request):
     try:
         query = "SELECT data1 FROM appscantests_sqlinjectiondata WHERE data1='" + query + "'"
         cursor.execute(query)
-        cursor.execute(query)
-        cursor.execute(query)
         row = cursor.fetchone()
-        if row:
-            result = "Results"
-        else:
-            result = 'No Results'
+#       if row:
+#        result = "Results"
+#       else:
+        result = 'OK'
     except (MySQLdb.ProgrammingError, MySQLdb.OperationalError):
-        result = 'No Results'
+        result = 'OK '
     cursor.close()
     conn.close()
     
     return HttpResponse(result)
 
+#def blind_sql_injection3(request):
+#    query = request.GET.get('query', '')
+#    conn = MySQLdb.connect (host = "localhost",
+#                           user = "root",
+#                           passwd = "",
+#                           db = "hackerhalted")
+#    cursor = conn.cursor()
+#    try:
+#        query = "SELECT data1 FROM appscantests_sqlinjectiondata WHERE data1='" + query + "'"
+#        cursor.execute(query)
+#        cursor.execute(query)
+#        cursor.execute(query)
+#        result = 'Good Query'
+#    except MySQLdb.ProgrammingError:
+#        result = 'Bad Query'
+#    cursor.close()
+#    conn.close()
+#    
+#    return HttpResponse(result)
+
+#def blind_sql_injection4(request):
+#    query = request.GET.get('query', '')
+#    conn = MySQLdb.connect (host = "localhost",
+#                           user = "root",
+#                           passwd = "",
+#                           db = "hackerhalted")
+#    cursor = conn.cursor()
+#    try:
+#        query = "SELECT data1 FROM appscantests_sqlinjectiondata WHERE data1='" + query + "'"
+#        cursor.execute(query)
+#        cursor.execute(query)
+#        cursor.execute(query)
+#        row = cursor.fetchone()
+#        if row:
+#            result = "Results"
+#        else:
+#            result = 'No Results'
+#    except (MySQLdb.ProgrammingError, MySQLdb.OperationalError):
+#        result = 'No Results'
+#    cursor.close()
+#    conn.close()
+#    
+#    return HttpResponse(result)
+
 def blind_sql_injection5(request):
     query = request.GET.get('query', '')
+    query = query.replace('--', '#')
     conn = MySQLdb.connect (host = "localhost",
                            user = "root",
                            passwd = "",
@@ -542,9 +593,30 @@ def blind_sql_injection5(request):
     try:
         query = "SELECT data1 FROM appscantests_sqlinjectiondata WHERE (data1='" + query + "' and 2=2)"
         cursor.execute(query)
-        result = 'Good Query'
+        result = '<html><head><title>foo</title></head><body>AAAAAAAAAAAAAA AAAAAAAAAAAAAA AAAAAAAAAAAAAA AAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vAAAAAAAAAAAAAA vvgood query</body></html>'
     except MySQLdb.ProgrammingError:
         result = 'Bad Query'
+    cursor.close()
+    conn.close()
+    
+    return HttpResponse(result)
+
+def blind_sql_injection6(request, num):
+    query = request.GET.get('query', '')
+    conn = MySQLdb.connect (host = "localhost",
+                           user = "root",
+                           passwd = "",
+                           db = "hackerhalted")
+    cursor = conn.cursor()
+    try:
+        query = "SELECT data1 FROM appscantests_sqlinjectiondata WHERE data1='" + query + "'"
+        cursor.execute(query)
+        if cursor.fetchone():
+            result = 'AAA' + 'B'*int(num)
+        else:
+            result = 'AAA'
+    except MySQLdb.ProgrammingError:
+        result = 'AAA'
     cursor.close()
     conn.close()
     
